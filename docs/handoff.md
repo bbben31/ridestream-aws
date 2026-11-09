@@ -1,5 +1,40 @@
 # Handoff
 
+## 2026-11-09 · Week 1 — design · ADR-001
+
+### Done
+- `docs/requirements.md` and this handoff committed.
+- `docs/adr/001-portable-business-logic.md` written and accepted.
+
+### Decisions
+- **New way of working:** Claude writes the first draft of each deliverable
+  and you review it, unless you say otherwise for a task. This replaces
+  "I write the first draft" in the project instructions.
+- ADR-001 (accepted): ports and adapters. `src/ridestream_core/` has no
+  cloud SDKs, `src/ridestream_aws/` holds the boto3 adapters, and
+  `services/<name>/handler.py` holds thin handlers. A pytest test enforces
+  the import rule. `claim()` must be atomic as part of its contract.
+- Handoff and project status are updated after each deliverable, not only
+  at the end of a session.
+
+### Open problems
+- Lambda packaging for the core (bundled into each zip or shared as a
+  layer): decide in week 2.
+
+### To do this week
+1. ~~Review and commit `docs/requirements.md`.~~ Done.
+2. Raise the working budget to $30 in AWS Budgets.
+3. Master CV, in a new "Master CV" chat. Bring your role-by-role LinkedIn
+   details: the project already has the IIT Madras title, PhD dates and
+   certifications.
+4. SAA-C03 study, about 5 h.
+5. ~~Review ADR-001.~~ Accepted.
+6. ADRs 002–006, then the architecture diagram.
+7. Before week 3: move the personal docs out of the repo.
+
+### Next step
+ADR-002 (DynamoDB vs DocumentDB vs MongoDB Atlas): Claude drafts, you review.
+
 ## 2026-11-09 · Week 1 — design · requirements
 
 ### Done
@@ -31,15 +66,3 @@
 - The route-matrix default quota (5 requests/s) caps bookings at about 5/s.
 - The plan and context `.md` files sit untracked in the repo root. Move them
   out before the repo goes public in week 3.
-
-### To do this week
-1. Review and commit `docs/requirements.md`.
-2. Raise the working budget to $30 in AWS Budgets.
-3. Master CV, in a new "Master CV" chat.
-4. SAA-C03 study, about 5 h.
-5. ADR-001 (portability): your first draft, then challenge.
-6. ADRs 002–006, then the architecture diagram.
-7. Before week 3: move the personal docs out of the repo.
-
-### Next step
-Write the first draft of ADR-001 and bring it to the Week 1 chat.
