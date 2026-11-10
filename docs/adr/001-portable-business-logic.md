@@ -26,6 +26,10 @@ If these rules are written directly inside Lambda handlers around boto3 calls:
   retries and SDK error handling, which makes it harder to read and to
   explain in an interview
 
+Background: the 2023 capstone separated database code into its own Lambda,
+called over the network for each request or record. That showed the need;
+this ADR meets it without the extra hop.
+
 ## Decision
 
 Split the code into three layers, using the *ports and adapters*
