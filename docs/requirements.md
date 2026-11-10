@@ -1,8 +1,13 @@
 # RideStream — requirements
 
-Status: draft v0.1 · Week 1 · 9 November 2026
+Status: draft v0.2 · Week 1 · 10 November 2026
 
 ## 1. Purpose and scope
+
+RideStream is a new design of the idea behind the 2023 IIT Madras cloud
+capstone, the "Location Based Taxi Aggregator". The 2023 system is a
+reference for what is expected (`docs/baseline-2023.md`), not a template:
+these requirements stand on their own.
 
 RideStream is a ride-hailing location platform for London. Simulated taxis
 stream their positions to AWS. Riders book the nearest available taxi of the
@@ -38,14 +43,16 @@ users.
 - **FR-05** While a taxi is not `OFFLINE`, its position is sent every 5 seconds.
 - **FR-06** The system keeps the latest position and status of every taxi.
 - **FR-07** A taxi outside the London service area is excluded from matching
-  until it re-enters the area.
+  until it re-enters the area. Leaving and re-entering the area are
+  published as events.
 - **FR-08** Riders do not stream their position. The pickup location is sent
   with the booking request.
 
 ### Booking and matching
 
 - **FR-09** A rider can request a booking with a pickup location and a taxi
-  type. A pickup outside the service area is rejected.
+  type (`basic`, `deluxe`, `luxury`, or `any`, as in 2023). A pickup outside
+  the service area is rejected.
 - **FR-10** Matching finds `AVAILABLE` taxis of the requested type near the
   pickup point by straight-line distance. It searches in widening rings
   (1 km, 2 km, then 3 km at most) and keeps up to 10 candidates.
@@ -138,7 +145,7 @@ A driver can go `OFFLINE` only from `AVAILABLE`, not during a trip. Only
 | NFR-04 | Booking latency | `POST /bookings` p95 < 500 ms with `straight_line`; p95 < 800 ms with `driving_time` (provisional) | API Gateway latency metric at 5 bookings/s |
 | NFR-05 | No double booking | 0 taxis assigned twice | Concurrency test: 100 simultaneous bookings for 10 available taxis → exactly 10 `ASSIGNED`, 90 `NO_DRIVER_AVAILABLE` |
 | NFR-06 | Security | Every endpoint needs a valid Cognito token and the right role; no stored secrets; least-privilege IAM role per function; encryption at rest everywhere; all inputs validated | Tests for unauthenticated and wrong-role calls; checkov; IAM Access Analyzer |
-| NFR-07 | Cost | Destroyed: about $0 (only the Terraform state bucket remains). Deployed and idle: ≤ $1/day. One-hour load test at NFR-01: ≤ $5 (provisional, see 7). Monthly: within the $30 working budget and $50 ceiling | AWS Budgets, Cost Explorer filtered by the `Project=ridestream` tag |
+| NFR-07 | Cost | Destroyed: about $0 (only the Terraform state bucket remains). Deployed and idle: ≤ $1/day. One-hour load test at NFR-01: ≤ $5 (estimated $0.50–$1 plus Lambda; ADR-004). Monthly: within the $30 working budget and $50 ceiling | AWS Budgets, Cost Explorer filtered by the `Project=ridestream` tag |
 | NFR-08 | Availability | Single region (eu-west-2), relying on the multi-AZ design of managed services. No DR and no uptime target | Stated, not tested |
 | NFR-09 | Data retention | DynamoDB keeps the latest position per taxi only. Raw positions in S3 expire after 30 days. Kinesis keeps data for 24 h (default) | S3 lifecycle rule, stream settings |
 | NFR-10 | Portability | Business logic (matching, geohash, lifecycles, validation) has no AWS imports and is unit tested without AWS | Lint rule or test that fails on `boto3` imports in core modules; core test coverage ≥ 80 % |
@@ -169,15 +176,13 @@ A driver can go `OFFLINE` only from `AVAILABLE`, not during a trip. Only
 
 ### Open questions
 
-- **Amazon Location prices in eu-west-2.** Trackers are billed per position
-  written, and geofences per position evaluated. At 720,000 positions per hour,
-  this could be the largest cost. Confirm prices before ADR-004, and decide
-  how to filter updates (for example, send to the tracker only when a taxi
-  has moved at least 50 m or its status has changed). NFR-07's $5 load-test
-  target depends on this.
-- **Route matrix price and quota.** Each booking costs about 10 routes. The
-  default quota (5 requests/s) caps bookings at about 5/s unless it's raised.
-  Confirm the per-route price before ADR-004.
+- **Resolved by ADR-004:** per-position tracking and geofencing in Amazon
+  Location would cost about $46–$116 per load-test hour. The service-area
+  check runs in the core instead; Amazon Location is used only for driving
+  times.
+- **Route matrix quota.** Each booking costs about 10 routes. The default
+  quota (5 requests/s) caps driving-time bookings at about 5/s unless it's
+  raised.
 - **NFR-04 driving-time target (800 ms)** is a guess until measured in week 4.
 - **Search radius (1/2/3 km)** is a starting point, to be tuned with the
   simulator.
