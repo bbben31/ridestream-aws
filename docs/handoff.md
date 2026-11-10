@@ -1,5 +1,23 @@
 # Handoff
 
+## 2026-11-10 · Week 1 — design · architecture diagram
+
+### Done
+- Week 1 work committed on `docs/week1-design` and pushed.
+- `docs/architecture.md`: system overview, ingestion steps, booking
+  sequence (with the atomic claim), deployment and access, component
+  summary. Diagrams in Mermaid, checked by rendering them.
+
+### Decisions
+- Diagrams are Mermaid in the repository, drawn by GitHub and reviewed in
+  pull requests like code, instead of draw.io for now. A polished image with
+  AWS icons is made for the README in week 10.
+
+### Next step
+Review `docs/architecture.md`, commit it on `docs/week1-design`, then open
+the week 1 pull request into `main`. Week 2 (16–22 Nov): repository
+skeleton, Terraform bootstrap and state, OIDC and the pipeline.
+
 ## 2026-11-10 · Week 1 — design · ADR-005 and ADR-006
 
 ### Done
