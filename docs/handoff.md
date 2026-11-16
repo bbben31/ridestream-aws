@@ -1,5 +1,51 @@
 # Handoff
 
+## 2026-11-16 · Week 2 — foundation · session 1: repository skeleton
+
+### Done
+- Week 1 pull request merged into `main`.
+- Skeleton drafted, waiting for your review: `.gitignore`,
+  `.python-version`, `pyproject.toml`, `Makefile`,
+  `.pre-commit-config.yaml`, `README.md`, `infra/README.md`,
+  `src/ridestream_core/`, `src/ridestream_aws/` and
+  `tests/test_core_imports.py` (the ADR-001 import rule).
+- Checked in a sandbox with Python 3.14.6, uv 0.11.32, ruff 0.17.5 and
+  pytest 9.2.0: ruff and the 3 tests pass, and the import test fails when
+  `import boto3` is added to the core.
+
+### Decisions
+- Week 2 is three sessions: skeleton; bootstrap (state bucket, OIDC
+  provider, deploy role); pipeline.
+- The repository goes public at the end of session 1, not in week 3.
+  Required reviewers on a GitHub environment are only available on public
+  repositories on the Free, Pro and Team plans, and the apply workflow
+  needs that approval gate.
+- No build backend in `pyproject.toml`: the project isn't an installable
+  package. Tests find the code through pytest's `pythonpath = ["src"]`.
+- Tool versions are pinned in `.pre-commit-config.yaml` (pre-commit-hooks
+  v6.0.0, gitleaks v8.30.1, ruff v0.17.5) and locked in `uv.lock`.
+- Empty directories aren't created ahead of time. `infra/bootstrap/`,
+  `infra/envs/dev/` and `services/` appear when they have content.
+
+### Open problems
+- Not run on your machine yet: `uv sync`, `pre-commit run --all-files`
+  (the gitleaks hook couldn't be built in the sandbox), `make lint`,
+  `make test`, and `terraform fmt` on a directory with no `.tf` files.
+- Lambda packaging (core bundled into each zip, or a layer): bundling is
+  recommended, not yet decided. Needed by week 3.
+- No `LICENSE` file. Decide before or just after going public.
+- tflint, checkov and Terraform pre-commit hooks: added in session 2, when
+  there is Terraform to check.
+- The 2023 GitHub token in the capstone archive: confirm it is revoked.
+- Master CV and SAA study from week 1: status not confirmed.
+
+### Next step
+Review the skeleton. Then in your terminal: move the two personal docs out
+of the repository, create `feat/repo-skeleton`, run `uv sync`,
+`pre-commit install`, `pre-commit run --all-files`, `make lint test`,
+commit, open the pull request and merge it. Scan the history with gitleaks
+and make the repository public. Then session 2: `infra/bootstrap/`.
+
 ## 2026-11-10 · Week 1 — design · architecture diagram
 
 ### Done

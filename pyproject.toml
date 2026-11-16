@@ -1,0 +1,30 @@
+[project]
+name = "ridestream"
+version = "0.1.0"
+description = "Ride-hailing location platform on AWS"
+readme = "README.md"
+requires-python = ">=3.14"
+# Runtime dependencies of the Lambda functions go here. None yet.
+dependencies = []
+
+# Tools needed to develop and test, never shipped in a Lambda package.
+# `uv sync` installs this group by default.
+[dependency-groups]
+dev = [
+    "pytest>=9.2",
+    "ruff>=0.17.5",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Makes `import ridestream_core` work in tests without installing a package.
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# E, F: pycodestyle and pyflakes (errors, unused names)
+# I: import order    B: likely bugs    UP: outdated syntax
+select = ["E", "F", "I", "B", "UP"]
