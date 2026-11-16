@@ -1,0 +1,9 @@
+# Checkov settings, used by the pre-commit hook and (from session 3) by CI.
+# Exceptions are not listed here: each one is a `#checkov:skip=` comment
+# with its reason, next to the resource it applies to.
+framework:
+  - terraform
+compact: true
+quiet: true
+# Don't call the Prisma Cloud API for extra metadata.
+skip-download: true
