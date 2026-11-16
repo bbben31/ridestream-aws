@@ -1,6 +1,6 @@
 # ADR-007: Two GitHub OIDC roles and a permissions boundary
 
-- Status: Proposed
+- Status: Accepted (2026-11-16)
 - Date: 2026-11-16
 - Related: ADR-005 (refines its "OIDC deploy role"), NFR-11, project conventions
 

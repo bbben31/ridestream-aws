@@ -5,59 +5,66 @@
 ### Done
 - Session 1 closed: skeleton merged, history scanned with gitleaks,
   repository public.
-- Drafted, waiting for your review. **Nothing has been applied to AWS.**
-  - `infra/bootstrap/`: state bucket, GitHub OIDC provider, plan role,
-    deploy role, workload permissions boundary, outputs, README.
-  - `docs/adr/007-github-oidc-roles.md` (status: Proposed).
-  - `.tflint.hcl`, `.checkov.yaml`, and four Terraform hooks in
-    `.pre-commit-config.yaml` (fmt, validate, tflint, checkov).
-  - `.gitignore` (one exception), `infra/README.md`, `README.md` (ADR row).
-- Checked in a sandbox: every file parses as HCL; checkov 3.4.5 passes
-  with 98 checks passed, 0 failed and 8 skipped, each skip with its reason
-  in the code.
+- `infra/bootstrap/` written, reviewed and **applied by hand** to
+  `ridestream-dev`: 17 resources. State bucket, GitHub OIDC provider,
+  `ridestream-dev-github-plan`, `ridestream-dev-github-deploy`,
+  `ridestream-dev-workload-boundary`.
+- Bootstrap state moved from the local file into the bucket
+  (`bootstrap/terraform.tfstate`); `terraform plan` then reported no
+  changes.
+- On the workstation: `terraform validate`, tflint and checkov (98 passed,
+  0 failed, 8 skipped) all clean, with Terraform 1.11+, AWS provider
+  6.73.0 and random 3.9.1 (pinned in `.terraform.lock.hcl`).
+- Guardrail test: the policy simulator returns `explicitDeny` when the
+  deploy role tries `iam:UpdateAssumeRolePolicy` or `iam:AttachRolePolicy`
+  on itself.
+- `docs/adr/007-github-oidc-roles.md`, `.tflint.hcl`, `.checkov.yaml` and
+  four Terraform pre-commit hooks (fmt, validate, tflint, checkov).
+- Committed on `feat/terraform-bootstrap`; pull request #3 opened.
 
 ### Decisions
-- ADR-007 (proposed): two roles, not one. `ridestream-dev-github-plan` is
-  read-only and trusted only for pull requests;
-  `ridestream-dev-github-deploy` is trusted only for the `dev` GitHub
-  environment. The deploy role has PowerUserAccess plus IAM limited to
-  `ridestream-dev-*` roles that carry `ridestream-dev-workload-boundary`,
-  and is denied any change to what bootstrap created.
+- ADR-007: two roles, not one. `ridestream-dev-github-plan` is read-only
+  and trusted only for pull requests; `ridestream-dev-github-deploy` is
+  trusted only for the `dev` GitHub environment. The deploy role has
+  PowerUserAccess plus IAM limited to `ridestream-dev-*` roles that carry
+  `ridestream-dev-workload-boundary`, and is denied any change to what
+  bootstrap created.
 - The repository was created after 15 July 2026, so GitHub issues the
   immutable OIDC subject: `repo:OWNER@OWNER-ID/REPO@REPO-ID:…`. The prefix
-  is in `infra/bootstrap/github.auto.tfvars` and matched exactly.
+  is in `infra/bootstrap/github.auto.tfvars`, confirmed with `gh api`, and
+  matched exactly.
 - State bucket: SSE-S3, not a KMS key. No access logging, replication or
   event notifications. Reasons are in `state.tf`.
-- Bootstrap state: local for the first apply, then moved into the bucket
-  under `bootstrap/terraform.tfstate`. The bucket name is passed to
-  `terraform init` and is not in the code.
+- The bucket name is passed to `terraform init` and is not in the code.
 - Role ARNs contain the account ID, so they go into GitHub variables in
   session 3, not into files.
+- **Working method, changed:** every step of a guide starts with what the
+  step does and what each command in it is for, before the command.
+  "Why", "See" and "Cost" notes may still follow it. Git, GitHub and
+  Terraform are being learned through this project: no command is given
+  without its role.
 
 ### Open problems
-- Not run anywhere yet: `terraform fmt`, `validate`, `plan` and tflint
-  (Terraform couldn't be installed in the sandbox). The session guide runs
-  them before apply. Expect `terraform fmt` to realign some `=` signs.
-- Hook and plugin versions (pre-commit-terraform v1.109.1,
-  tflint-ruleset-aws 0.48.0) were the latest I could confirm; newer ones
-  may exist.
+- The OIDC sign-in itself is untested until a workflow runs (session 3).
 - The boundary's service list is a first estimate from the architecture.
   A missing service shows up as AccessDenied on a role whose own policy
   looks right.
-- `docs/architecture.md` section 4 shows one deploy role. Update it when
-  ADR-007 is accepted.
+- `docs/architecture.md` section 4 shows one deploy role; it should show
+  two.
 - `make lint` doesn't run tflint or checkov yet; only the hooks do. Decide
   in session 3, when CI is written.
+- `pre-commit run --all-files` only checks files Git already tracks, so
+  it skipped the Terraform hooks before `git add`. Run it after staging.
 - Carried over: Lambda packaging decision (needed by week 3), `LICENSE`
   file, the 2023 GitHub token, Master CV and SAA study status.
 
 ### Next step
-Follow the session 2 guide: review, check, plan, apply by hand, move the
-state into the bucket, commit, pull request. Then session 3: the `dev`
-GitHub environment with a required reviewer and `main` as its only
-deployment branch, the two role ARNs and the bucket name as GitHub
-variables, the pull request and apply workflows, `infra/envs/dev/` and one
-small resource deployed end to end.
+Close session 2: set ADR-007 to Accepted, commit that with this note and
+the `CLAUDE.md` rule, push, merge pull request #3, update local `main`.
+Then session 3: the `dev` GitHub environment with a required reviewer and
+`main` as its only deployment branch, the two role ARNs and the bucket
+name as GitHub variables, the pull request and apply workflows,
+`infra/envs/dev/` and one small resource deployed end to end.
 
 ## 2026-11-16 · Week 2 — foundation · session 1: repository skeleton
 
