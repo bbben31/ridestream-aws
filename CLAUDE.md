@@ -16,6 +16,9 @@ business logic free of AWS imports.
 - Run terraform plan only. Never run terraform apply or destroy: I do that.
 - Never write secrets, access keys or account IDs into files.
 - When I share code I wrote, review it before rewriting it, and explain why.
+- I am learning Git, GitHub and Terraform through this project. Before any
+  command, say what it does and what it is for. Never give a command
+  without its role.
 - Keep changes small: one task per session.
 - Business logic goes in plain Python modules with no boto3 or Lambda
   imports; AWS code stays in thin adapters and handlers.
