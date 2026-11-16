@@ -1,5 +1,64 @@
 # Handoff
 
+## 2026-11-16 · Week 2 — foundation · session 2: Terraform bootstrap
+
+### Done
+- Session 1 closed: skeleton merged, history scanned with gitleaks,
+  repository public.
+- Drafted, waiting for your review. **Nothing has been applied to AWS.**
+  - `infra/bootstrap/`: state bucket, GitHub OIDC provider, plan role,
+    deploy role, workload permissions boundary, outputs, README.
+  - `docs/adr/007-github-oidc-roles.md` (status: Proposed).
+  - `.tflint.hcl`, `.checkov.yaml`, and four Terraform hooks in
+    `.pre-commit-config.yaml` (fmt, validate, tflint, checkov).
+  - `.gitignore` (one exception), `infra/README.md`, `README.md` (ADR row).
+- Checked in a sandbox: every file parses as HCL; checkov 3.4.5 passes
+  with 98 checks passed, 0 failed and 8 skipped, each skip with its reason
+  in the code.
+
+### Decisions
+- ADR-007 (proposed): two roles, not one. `ridestream-dev-github-plan` is
+  read-only and trusted only for pull requests;
+  `ridestream-dev-github-deploy` is trusted only for the `dev` GitHub
+  environment. The deploy role has PowerUserAccess plus IAM limited to
+  `ridestream-dev-*` roles that carry `ridestream-dev-workload-boundary`,
+  and is denied any change to what bootstrap created.
+- The repository was created after 15 July 2026, so GitHub issues the
+  immutable OIDC subject: `repo:OWNER@OWNER-ID/REPO@REPO-ID:…`. The prefix
+  is in `infra/bootstrap/github.auto.tfvars` and matched exactly.
+- State bucket: SSE-S3, not a KMS key. No access logging, replication or
+  event notifications. Reasons are in `state.tf`.
+- Bootstrap state: local for the first apply, then moved into the bucket
+  under `bootstrap/terraform.tfstate`. The bucket name is passed to
+  `terraform init` and is not in the code.
+- Role ARNs contain the account ID, so they go into GitHub variables in
+  session 3, not into files.
+
+### Open problems
+- Not run anywhere yet: `terraform fmt`, `validate`, `plan` and tflint
+  (Terraform couldn't be installed in the sandbox). The session guide runs
+  them before apply. Expect `terraform fmt` to realign some `=` signs.
+- Hook and plugin versions (pre-commit-terraform v1.109.1,
+  tflint-ruleset-aws 0.48.0) were the latest I could confirm; newer ones
+  may exist.
+- The boundary's service list is a first estimate from the architecture.
+  A missing service shows up as AccessDenied on a role whose own policy
+  looks right.
+- `docs/architecture.md` section 4 shows one deploy role. Update it when
+  ADR-007 is accepted.
+- `make lint` doesn't run tflint or checkov yet; only the hooks do. Decide
+  in session 3, when CI is written.
+- Carried over: Lambda packaging decision (needed by week 3), `LICENSE`
+  file, the 2023 GitHub token, Master CV and SAA study status.
+
+### Next step
+Follow the session 2 guide: review, check, plan, apply by hand, move the
+state into the bucket, commit, pull request. Then session 3: the `dev`
+GitHub environment with a required reviewer and `main` as its only
+deployment branch, the two role ARNs and the bucket name as GitHub
+variables, the pull request and apply workflows, `infra/envs/dev/` and one
+small resource deployed end to end.
+
 ## 2026-11-16 · Week 2 — foundation · session 1: repository skeleton
 
 ### Done

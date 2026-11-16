@@ -20,6 +20,8 @@ crash.log
 crash.*.log
 *.tfvars
 !*.tfvars.example
+# Not a secret: the repository's public OIDC subject prefix (see ADR-007).
+!infra/bootstrap/github.auto.tfvars
 
 # Local environment and secrets
 .env

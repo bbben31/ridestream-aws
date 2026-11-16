@@ -21,6 +21,7 @@ area, and every trip feeds an analytics store.
 | [004](docs/adr/004-service-area-and-routing.md) | Service-area check in code; Amazon Location for driving times |
 | [005](docs/adr/005-terraform.md) | Terraform for all infrastructure |
 | [006](docs/adr/006-simulator-runtime.md) | One simulator image, local or on Fargate |
+| [007](docs/adr/007-github-oidc-roles.md) | Two GitHub OIDC roles (plan, deploy) and a permissions boundary (proposed) |
 
 ## Repository layout
 
